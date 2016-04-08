@@ -8,4 +8,9 @@ module Listable
     formatted_date = dates.compact.map! { |d| d.strftime("%D") }.join ' -- '
     formatted_date.empty? ? empty_message : formatted_date
   end
+
+  def format_priority(priority)
+    priority_values = {'high' => ' ⇧', 'medium' => ' ⇨', 'low'  => ' ⇩', nil => ''}
+    priority_values[priority]
+  end
 end
