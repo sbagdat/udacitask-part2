@@ -10,7 +10,7 @@ module Listable
   end
 
   def format_priority(priority)
-    priority_values = {'high' => ' ⇧', 'medium' => ' ⇨', 'low'  => ' ⇩', nil => ''}
-    priority_values[priority]
+    priority_values = {'high' => [' ⇧', :red], 'medium' => [' ⇨', :yellow], 'low'  => [' ⇩', :green], nil => ['', :black]}
+    priority_values[priority][0].colorize(priority_values[priority][1])
   end
 end
