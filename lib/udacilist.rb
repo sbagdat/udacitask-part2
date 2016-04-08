@@ -25,12 +25,15 @@ class UdaciList
   end
 
   def filter(type)
-    print_items(case type
-                when 'todo'  then @items.select {|item| item.is_a? TodoItem}
-                when 'event' then @items.select {|item| item.is_a? EventItem}
-                when 'link'  then @items.select {|item| item.is_a? LinkItem}
-                else raise UdaciListErrors::InvalidItemType, "\"#{type}\" type is not supported."
-                end)
+    print_items case type
+    when 'todo'
+      {items: @items.select {|item| item.is_a? TodoItem}, title_extend: 'Todo Items'}
+    when 'event'
+      {items: @items.select {|item| item.is_a? EventItem}, title_extend: 'Event Items'}
+    when 'link'
+      {items: @items.select {|item| item.is_a? LinkItem}, title_extend: 'Link Items'}
+    else raise UdaciListErrors::InvalidItemType, "\"#{type}\" type is not supported."
+    end
   end
 
   private
@@ -39,12 +42,15 @@ class UdaciList
     %w(todo event link).include?(type)
   end
 
-  def print_items(items=@items)
-    puts "-" * @title.length
-    puts @title
-    puts "-" * @title.length
+  def print_items(options = {items: @items, title_extend: nil})
+    rows = []
+    items = options[:items]
+    title = [@title, options[:title_extend]].compact.join(' - ')
     items.each_with_index do |item, position|
-      puts "#{position + 1}) #{item.details}"
+      rows << [position + 1, item.details]
     end
+
+    table = Terminal::Table.new :title => title, :headings => ['#', 'Details'], :rows => rows
+    puts table
   end
 end
