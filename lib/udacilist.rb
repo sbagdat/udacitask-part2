@@ -8,9 +8,7 @@ class UdaciList
 
   def add(type, description, options={})
     type.downcase!
-    unless item_types.include?(type)
-      raise UdaciListErrors::InvalidItemType, "\"#{type}\" type is not supported."
-    end
+    raise UdaciListErrors::InvalidItemType, "\"#{type}\" type is not supported." unless valid_type?(type)
 
     @items.push TodoItem.new(description, options) if type == "todo"
     @items.push EventItem.new(description, options) if type == "event"
@@ -23,17 +21,30 @@ class UdaciList
   end
 
   def all
-    puts "-" * @title.length
-    puts @title
-    puts "-" * @title.length
-    @items.each_with_index do |item, position|
-      puts "#{position + 1}) #{item.details}"
-    end
+    print_items
+  end
+
+  def filter(type)
+    print_items(case type
+                when 'todo'  then @items.select {|item| item.is_a? TodoItem}
+                when 'event' then @items.select {|item| item.is_a? EventItem}
+                when 'link'  then @items.select {|item| item.is_a? LinkItem}
+                else raise UdaciListErrors::InvalidItemType, "\"#{type}\" type is not supported."
+                end)
   end
 
   private
 
-  def item_types
-    %w(todo event link)
+  def valid_type?(type)
+    %w(todo event link).include?(type)
+  end
+
+  def print_items(items=@items)
+    puts "-" * @title.length
+    puts @title
+    puts "-" * @title.length
+    items.each_with_index do |item, position|
+      puts "#{position + 1}) #{item.details}"
+    end
   end
 end
