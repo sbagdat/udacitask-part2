@@ -8,18 +8,23 @@ class UdaciList
 
   def add(type, description, options={})
     type.downcase!
-    raise UdaciListErrors::InvalidItemType, "\"#{type}\" type is not supported." unless valid_type?(type)
 
-    @items.push TodoItem.new(description, options) if type == "todo"
-    @items.push EventItem.new(description, options) if type == "event"
-    @items.push LinkItem.new(description, options) if type == "link"
+    if types.key?(type)
+      @items << types[type].new(description, options)
+    else
+      raise UdaciListErrors::InvalidItemType, %Q("#{type}"" type is not supported.)
+    end
   end
 
   def delete(*indexes)
     indexes.each do |index|
-      @items[index-1] ? @items.delete_at(index - 1)
-                      : (raise UdaciListErrors::IndexExceedsListSize, "There is no item at ##{index}.")
+      if @items[index-1]
+        @items[index-1] = nil
+      else
+        raise UdaciListErrors::IndexExceedsListSize, "There is no item at ##{index}."
+      end
     end
+    @items.compact!
   end
 
   def all
@@ -44,8 +49,8 @@ class UdaciList
 
   private
 
-  def valid_type?(type)
-    %w(todo event link).include?(type)
+  def types
+    {'todo' => TodoItem, 'event' => EventItem, 'link' => LinkItem}
   end
 
   def print_items(options = {items: @items, filtered: nil})
