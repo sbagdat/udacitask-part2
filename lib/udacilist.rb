@@ -27,11 +27,11 @@ class UdaciList
   def filter(type)
     print_items case type
     when 'todo'
-      {items: @items.select {|item| item.is_a? TodoItem}, title_extend: 'Todo Items'}
+      {items: @items.select {|item| item.is_a? TodoItem}, filtered: true}
     when 'event'
-      {items: @items.select {|item| item.is_a? EventItem}, title_extend: 'Event Items'}
+      {items: @items.select {|item| item.is_a? EventItem}, filtered: true}
     when 'link'
-      {items: @items.select {|item| item.is_a? LinkItem}, title_extend: 'Link Items'}
+      {items: @items.select {|item| item.is_a? LinkItem}, filtered: true}
     else raise UdaciListErrors::InvalidItemType, "\"#{type}\" type is not supported."
     end
   end
@@ -42,15 +42,23 @@ class UdaciList
     %w(todo event link).include?(type)
   end
 
-  def print_items(options = {items: @items, title_extend: nil})
+  def print_items(options = {items: @items, filtered: nil})
     rows = []
     items = options[:items]
-    title = [@title, options[:title_extend]].compact.join(' - ')
+    title = "#{@title}" + (options[:filtered] ? " - #{items.first.class.to_s.gsub('Item', ' Items')}" : '')
+
     items.each_with_index do |item, position|
-      rows << [position + 1, item.details]
+      row = [position + 1]
+      row << item.class.to_s.gsub('Item', '') unless options[:filtered]
+      row << item.details
+      rows << row
     end
 
-    table = Terminal::Table.new :title => title, :headings => ['#', 'Details'], :rows => rows
+    headings = ['#']
+    headings << 'Type' unless options[:filtered]
+    headings << 'Item Details'
+
+    table = Terminal::Table.new :title => title, :headings => headings, :rows => rows
     puts table
   end
 end
