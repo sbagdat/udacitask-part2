@@ -26,6 +26,10 @@ class UdaciList
     print_items
   end
 
+  def update(index, options={})
+    @items[index-1].update(options)
+  end
+
   def filter(type)
     print_items case type
     when 'todo'
